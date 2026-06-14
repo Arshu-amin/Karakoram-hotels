@@ -21,9 +21,9 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" as const }}
         >
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
             Modern Experience
           </h1>
         </motion.div>
@@ -31,7 +31,7 @@ export default function Home() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" as const }}
           className="text-lg md:text-2xl text-slate-400 max-w-2xl mb-10"
         >
           An interactive, high-performance interface built with Next.js,
@@ -55,19 +55,22 @@ export default function Home() {
 
       {/* Features Grid */}
       <section className="relative z-10 max-w-7xl mx-auto py-24 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6">
           {[
             { title: "Performance", desc: "Optimized for speed and high frame rates." },
             { title: "3D Visuals", desc: "Stunning 3D components rendered with WebGL." },
-            { title: "Modern Stack", desc: "Built with the latest technologies and best practices." }
+            { title: "Modern Stack", desc: "Built with the latest technologies and best practices." },
+            { title: "Interactive", desc: "Engage users with immersive experiences." }
           ].map((feature, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 backdrop-blur-sm"
+              transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" as const }}
+              className={`p-8 rounded-3xl bg-white/5 backdrop-blur-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 ${
+                i === 0 ? 'md:col-span-2' : i === 1 ? 'md:row-span-2' : ''
+              }`}
             >
               <h3 className="text-xl font-bold mb-3 text-indigo-300">{feature.title}</h3>
               <p className="text-slate-400">{feature.desc}</p>
