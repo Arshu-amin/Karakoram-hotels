@@ -1,85 +1,182 @@
 'use client'
 
+import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { ArrowRight, Sparkles, Sliders } from 'lucide-react'
+
+import Navbar from '@/components/Navbar'
+import CustomizerControlPanel, { CustomizerState } from '@/components/CustomizerControlPanel'
+import Features from '@/components/Features'
+import ShowcaseGallery from '@/components/ShowcaseGallery'
+import TechStack from '@/components/TechStack'
+import CodeExportModal from '@/components/CodeExportModal'
+import Footer from '@/components/Footer'
 
 const Scene = dynamic(() => import('@/components/Scene'), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-slate-900 animate-pulse" />
+  loading: () => (
+    <div className="h-full w-full bg-slate-950 flex flex-col items-center justify-center gap-3">
+      <div className="w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+      <span className="font-mono text-xs text-indigo-400 animate-pulse">Initializing WebGL Engine...</span>
+    </div>
+  ),
 })
 
 export default function Home() {
-  return (
-    <main className="relative min-h-screen bg-slate-950 text-white overflow-hidden">
-      {/* Background 3D Scene */}
-      <div className="absolute inset-0 z-0 opacity-60">
-        <Scene />
-      </div>
+  const [customizerState, setCustomizerState] = useState<CustomizerState>({
+    shape: 'torusKnot',
+    color: '#6366f1',
+    speed: 2.0,
+    distort: 0.4,
+    wireframe: false,
+  })
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false)
+
+  const { scrollY } = useScroll()
+  const sceneOpacity = useTransform(scrollY, [0, 800], [0.85, 0.4])
+  const sceneScale = useTransform(scrollY, [0, 800], [1, 1.1])
+
+  const handleStateChange = (newState: Partial<CustomizerState>) => {
+    setCustomizerState((prev) => ({ ...prev, ...newState }))
+  }
+
+  return (
+    <main className="relative min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden selection:bg-indigo-500/30">
+      {/* Fixed Ambient 3D WebGL Canvas Layer */}
+      <motion.div
+        className="fixed inset-0 z-0 pointer-events-auto"
+        style={{ opacity: sceneOpacity, scale: sceneScale }}
+      >
+        <Scene
+          shape={customizerState.shape}
+          color={customizerState.color}
+          speed={customizerState.speed}
+          distort={customizerState.distort}
+          wireframe={customizerState.wireframe}
+        />
+      </motion.div>
+
+      {/* Decorative ambient background glowing light orbs */}
+      <div className="glow-orb top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600 z-0" />
+      <div className="glow-orb top-[40%] right-[-10%] w-[600px] h-[600px] bg-purple-600 z-0" />
+      <div className="glow-orb bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-600 z-0" />
+
+      {/* Top Fixed Navigation Header */}
+      <Navbar />
+
+      {/* Hero Section */}
+      <section className="relative z-10 pt-36 pb-20 px-4 max-w-7xl mx-auto min-h-screen flex flex-col justify-center items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8 backdrop-blur-xl"
         >
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            Modern Experience
-          </h1>
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span className="text-xs font-semibold text-slate-200 tracking-wide">
+            Next-Gen WebGL 3D Interactive Studio
+          </span>
         </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-2xl text-slate-400 max-w-2xl mb-10"
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight max-w-5xl mb-8 leading-[1.05]"
         >
-          An interactive, high-performance interface built with Next.js,
-          Tailwind CSS, and 3D animations.
+          Craft Immersive <br className="hidden sm:inline" />
+          <span className="text-gradient-primary">3D Experiences</span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-lg md:text-2xl text-slate-300 max-w-2xl mb-12 font-normal leading-relaxed"
+        >
+          Manipulate geometry, material noise, and color shaders in real-time. Built for modern web applications with Next.js, React 19, and Three.js.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col sm:flex-row gap-4 items-center"
         >
-          <button className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/25">
-            Get Started
-          </button>
-          <button className="px-8 py-4 border border-slate-700 hover:bg-slate-800 rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95">
-            Learn More
-          </button>
+          <a
+            href="#customizer"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-base flex items-center justify-center gap-2 shadow-2xl shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
+          >
+            <Sliders className="w-5 h-5" /> Explore Interactive Studio
+          </a>
+          <a
+            href="#presets"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl glass hover:bg-slate-800/80 text-slate-200 font-semibold text-base flex items-center justify-center gap-2 border border-white/10 transition-all hover:scale-105 active:scale-95"
+          >
+            View Presets <ArrowRight className="w-5 h-5 text-indigo-400" />
+          </a>
         </motion.div>
-      </div>
 
-      {/* Features Grid */}
-      <section className="relative z-10 max-w-7xl mx-auto py-24 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Stats Ticker */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl"
+        >
           {[
-            { title: "Performance", desc: "Optimized for speed and high frame rates." },
-            { title: "3D Visuals", desc: "Stunning 3D components rendered with WebGL." },
-            { title: "Modern Stack", desc: "Built with the latest technologies and best practices." }
-          ].map((feature, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 backdrop-blur-sm"
+            { label: 'FRAME RATE', value: '60 FPS', sub: 'Hardware Accelerated' },
+            { label: 'RENDER TIME', value: '< 16ms', sub: 'Zero Frame Drops' },
+            { label: 'SHADER ENGINE', value: 'WebGL 2.0', sub: 'Physical Materials' },
+            { label: 'INTERACTION', value: '100% Realtime', sub: 'Synchronized DOM' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="glass p-5 rounded-2xl border border-white/10 text-left backdrop-blur-xl"
             >
-              <h3 className="text-xl font-bold mb-3 text-indigo-300">{feature.title}</h3>
-              <p className="text-slate-400">{feature.desc}</p>
-            </motion.div>
+              <div className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest mb-1">
+                {stat.label}
+              </div>
+              <div className="text-2xl font-black text-white">{stat.value}</div>
+              <div className="text-xs text-slate-400 mt-1">{stat.sub}</div>
+            </div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-12 border-t border-slate-900 text-center text-slate-500">
-        <p>© 2026 Next.js 3D App. All rights reserved.</p>
-      </footer>
+      {/* Interactive Customizer Control Studio Section */}
+      <section id="customizer" className="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+        <CustomizerControlPanel
+          state={customizerState}
+          onChange={handleStateChange}
+          onOpenCodeModal={() => setIsCodeModalOpen(true)}
+        />
+      </section>
+
+      {/* Features Showcase */}
+      <Features />
+
+      {/* Preset Showcase Gallery */}
+      <ShowcaseGallery onApplyPreset={handleStateChange} />
+
+      {/* Tech Stack Highlights */}
+      <TechStack />
+
+      {/* Code Export Drawer Modal */}
+      <CodeExportModal
+        isOpen={isCodeModalOpen}
+        onClose={() => setIsCodeModalOpen(false)}
+        state={customizerState}
+      />
+
+      {/* Footer Section */}
+      <Footer />
     </main>
   )
 }
